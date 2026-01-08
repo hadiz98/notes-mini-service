@@ -63,13 +63,13 @@ if st.button("➕ Add Note"):
 # ------------------ NOTES TABLE ------------------
 if notes:
     # Table header
-    header_cols = st.columns([1, 3, 5, 1, 2])
-    headers = ["ID", "Title", "Content", "Done", "Created At"]
+    header_cols = st.columns([1, 3, 5, 1, 2,1.3])
+    headers = ["ID", "Title", "Content", "Done", "Created At", "Actions"]
     for col, header in zip(header_cols, headers):
         col.markdown(f"**{header}**")
 
     for note in notes:
-        row_cols = st.columns([1, 3, 5, 1, 2])
+        row_cols = st.columns([1, 3, 5, 1, 2 ,1.3])
         note_id = note["id"]
 
         row_cols[0].write(note_id)
@@ -81,6 +81,20 @@ if notes:
         except ValueError:
             created = note["created_at"]
         row_cols[4].write(created)
+
+        # -------- ACTIONS --------
+        with row_cols[5]:
+            col_edit, col_delete = st.columns([1, 1])
+
+            # EDIT BUTTON
+            with col_edit:
+                st.button("Edit", key=f"edit_{note_id}")
+                
+
+            # DELETE BUTTON
+            with col_delete:
+                st.button("Delete", key=f"delete_{note_id}" ,type="primary")
+                    
 # ------------------ NO NOTES MESSAGE ------------------
 if not notes:
     st.info("No notes found. Add a new note above.")
