@@ -25,6 +25,25 @@ def get_notes():
 notes = get_notes()
 
 
+if st.button("Add Note"):
+        @st.dialog("Add New Note")
+        def add_note_dialog():
+            title = st.text_input("Title")
+            content = st.text_area("Content")
+            done = st.checkbox("Done", value=False)
+
+            if st.button("Save Note"):
+                payload = {"title": title, "content": content, "done": done}
+                try:
+                    resp = requests.post(f"{st.session_state.backend_url}/notes", json=payload)
+                    resp.raise_for_status()
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error adding note: {e}")
+
+        add_note_dialog()
+
+
 if notes:
     # Table header
     cols = st.columns([1, 3, 5, 1, 2])  # last column for Actions
