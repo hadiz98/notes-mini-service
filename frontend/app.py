@@ -11,6 +11,10 @@ if "backend_url" not in st.session_state:
     st.session_state.backend_url = "http://127.0.0.1:8000"
 if "show_toast" not in st.session_state:
     st.session_state.show_toast = None  # message to show in toast
+if "edit_note_id" not in st.session_state:
+    st.session_state.edit_note_id = None
+if "delete_note_id" not in st.session_state:
+    st.session_state.delete_note_id = None
 
 BACKEND_URL = st.session_state.backend_url
 
@@ -88,13 +92,45 @@ if notes:
 
             # EDIT BUTTON
             with col_edit:
-                st.button("Edit", key=f"edit_{note_id}")
-                
+                if st.button("Edit", key=f"edit_{note_id}"):
+                    st.session_state.edit_note_id = note_id
 
             # DELETE BUTTON
             with col_delete:
-                st.button("Delete", key=f"delete_{note_id}" ,type="primary")
-                    
+                if st.button("Delete", key=f"delete_{note_id}" ,type="primary"):
+                    st.session_state.delete_note_id = note_id
+
+
+# ------------------ DELETE DIALOG ------------------
+if st.session_state.delete_note_id is not None:
+    note_to_delete = None
+    for n in notes:
+       if n["id"] == st.session_state.delete_note_id:
+         note_to_delete = n
+         break
+    if note_to_delete:
+        @st.dialog("⚠️ Confirm Delete")
+        def delete_dialog():
+            st.warning(f"Note ID {note_to_delete['id']}: Are you sure you want to delete note **{note_to_delete['title']}**?")
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("Yes, Delete", key=f"confirm_delete_{note_to_delete['id']}"):
+                    try:
+                        resp = requests.delete(f"{BACKEND_URL}/notes/{note_to_delete['id']}",)
+                        resp.raise_for_status()
+                        st.session_state.delete_note_id = None
+                        st.session_state.show_toast = "✅ Note deleted successfully!"
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error deleting note: {e}")
+            with c2:
+                if st.button("Cancel", key=f"cancel_delete_{note_to_delete['id']}", type="tertiary"):
+                    st.session_state.delete_note_id = None
+                    st.rerun()
+
+        delete_dialog()
+
+
 # ------------------ NO NOTES MESSAGE ------------------
 if not notes:
     st.info("No notes found. Add a new note above.")
