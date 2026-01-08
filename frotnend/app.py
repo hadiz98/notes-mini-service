@@ -18,6 +18,6 @@ with st.expander("Settings", expanded=False):
         st.session_state.backend_url = backend_url_input
         st.success("Settings saved!")
 
-# Access the backend URL anywhere in the app
+# Save and Access the backend URL
 BACKEND_URL = st.session_state.backend_url
 st.write(f"Current Backend URL: `{BACKEND_URL}`")
