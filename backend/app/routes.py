@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -19,3 +19,12 @@ def read_notes(db: Session = Depends(get_db)):
 @router.post("", response_model=schemas.NoteResponse, status_code=201)
 def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db)):
     return services.create_note(db, note)
+
+
+# Delete a note
+@router.delete("/{note_id}", status_code=204)
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+    deleted = services.delete_note(db, note_id)
+    if not deleted:
+        raise HTTPException(status_code=404 , detail="Note not found")
+

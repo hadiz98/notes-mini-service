@@ -17,3 +17,13 @@ def create_note(db: Session, note: schemas.NoteCreate) -> models.Note:
 # Get all notes
 def get_notes(db: Session) -> List[models.Note]:
     return db.query(models.Note).order_by(models.Note.created_at.desc()).all()
+
+# Delete a note
+def delete_note(db: Session, note_id: int) -> bool:
+    db_note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if not db_note:
+        return False
+    db.delete(db_note)
+    db.commit()
+    return True
+
