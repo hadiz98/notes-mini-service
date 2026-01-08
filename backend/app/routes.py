@@ -27,4 +27,11 @@ def delete_note(note_id: int, db: Session = Depends(get_db)):
     deleted = services.delete_note(db, note_id)
     if not deleted:
         raise HTTPException(status_code=404 , detail="Note not found")
+    
 
+@router.put("/{note_id}", response_model=schemas.NoteResponse)
+def update_note_route(note_id: int, note: schemas.NoteUpdate, db: Session = Depends(get_db)):
+    updated_note = services.update_note(db, note_id, note)
+    if not updated_note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return updated_note
