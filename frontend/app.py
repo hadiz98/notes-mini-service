@@ -64,6 +64,34 @@ if st.button("Add Note"):
 
     add_note_dialog()
 
+
+# Text search
+search_text = st.text_input("Search by title or content", value="", key="search_text")
+
+# Done filter
+done_filter = st.selectbox(
+    "Filter by Done Status",
+    options=["All", "Done", "Not Done"],
+    key="done_filter"
+)
+
+# Apply filters
+filtered_notes = notes
+
+# Text filter
+if search_text:
+    filtered_notes = [
+        n for n in filtered_notes
+        if search_text.lower() in n["title"].lower() or search_text.lower() in n["content"].lower()
+    ]
+
+# Done filter
+if done_filter == "Done":
+    filtered_notes = [n for n in filtered_notes if n["done"]]
+elif done_filter == "Not Done":
+    filtered_notes = [n for n in filtered_notes if not n["done"]]
+
+    
 # ------------------ NOTES TABLE ------------------
 if notes:
     # Table header
@@ -72,7 +100,7 @@ if notes:
     for col, header in zip(header_cols, headers):
         col.markdown(f"**{header}**")
 
-    for note in notes:
+    for note in filtered_notes:
         row_cols = st.columns([1, 3, 5, 1, 2 ,1.3])
         note_id = note["id"]
 
