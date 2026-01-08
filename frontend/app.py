@@ -39,19 +39,24 @@ st.subheader("All Notes")
 if st.button("➕ Add Note"):
     @st.dialog("📝 Add New Note")
     def add_note_dialog():
-        title = st.text_input("Title", key="add_title")
+        title = st.text_input("Title", key="add_title",)
         content = st.text_area("Content", key="add_content")
         done = st.checkbox("Done", value=False, key="add_done")
 
         if st.button("Save Note", key="save_new_note"):
-            payload = {"title": title, "content": content, "done": done}
-            try:
-                resp = requests.post(f"{BACKEND_URL}/notes", json=payload)
-                resp.raise_for_status()
-                st.session_state.show_toast = "✅ Note added successfully!"
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error adding note: {e}")
+            if not title.strip():
+              st.error("❌ Title is required.")
+            elif not content.strip():
+              st.error("❌ Content is required.")
+            else:
+                payload = {"title": title, "content": content, "done": done}
+                try:
+                 resp = requests.post(f"{BACKEND_URL}/notes", json=payload)
+                 resp.raise_for_status()
+                 st.session_state.show_toast = "✅ Note added successfully!"
+                 st.rerun()
+                except Exception as e:
+                 st.error(f"Error adding note: {e}")
 
     add_note_dialog()
 
