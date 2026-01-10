@@ -1,6 +1,6 @@
 import streamlit as st
 from utils import show_toast, format_date
-from api import add_note, update_note, delete_note
+from api import add_note, get_notes, update_note, delete_note
 
 # ---- Add Note Dialog ----
 def add_note_dialog(backend_url):
@@ -106,27 +106,25 @@ def render_backend_config(backend_url):
     st.write(f"Current Backend URL: `{st.session_state.backend_url}`")
 
 
-def render_filters_and_notes(backend_url, notes):
- 
-# ------------------ FILTERS ------------------
+def render_filters_and_notes(backend_url):
+    # Filters
+    search_text = st.text_input("Search by title or content", value="", key="search_text")
+    done_filter = st.selectbox(
+        "Filter by Done Status",
+        options=["All", "Done", "Not Done"],
+        key="done_filter"
+    )
 
- search_text = st.text_input("Search by title or content", value="", key="search_text")
- done_filter = st.selectbox(
-    "Filter by Done Status",
-    options=["All", "Done", "Not Done"],
-    key="done_filter"
- )
+    # Map done_filter to boolean or None
+    done = None
+    if done_filter == "Done":
+        done = True
+    elif done_filter == "Not Done":
+        done = False
 
-# Apply filters
- filtered_notes = notes
- if search_text:
-    filtered_notes = [
-        n for n in filtered_notes
-        if search_text.lower() in n["title"].lower() or search_text.lower() in n["content"].lower()
-    ]
- if done_filter == "Done":
-    filtered_notes = [n for n in filtered_notes if n["done"]]
- elif done_filter == "Not Done":
-    filtered_notes = [n for n in filtered_notes if not n["done"]]
- render_notes_table(filtered_notes)
+    # Fetch filtered notes from backend
+    filtered_notes = get_notes(backend_url, q=search_text or None, done=done)
+
+    # Render table
+    render_notes_table(filtered_notes)
  

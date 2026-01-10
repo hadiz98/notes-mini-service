@@ -41,7 +41,7 @@ if st.button("➕ Add Note"):
     add_note_dialog(BACKEND_URL)
 
 # ------------------ NOTES Table ------------------
-render_filters_and_notes(BACKEND_URL , notes)
+render_filters_and_notes(BACKEND_URL)
 
 
 # ------------------ EDIT NOTE DIALOG ------------------
