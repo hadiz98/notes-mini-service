@@ -15,8 +15,16 @@ def create_note(db: Session, note: schemas.NoteCreate) -> models.Note:
     return db_note
 
 # Get all notes
-def get_notes(db: Session) -> List[models.Note]:
-    return db.query(models.Note).order_by(models.Note.created_at.desc()).all()
+def get_notes(db: Session, q: str | None = None, done: bool | None = None) -> List[models.Note]:
+    query = db.query(models.Note)
+    if q:
+        query = query.filter(
+            (models.Note.title.ilike(f"%{q}%")) | (models.Note.content.ilike(f"%{q}%"))
+        )
+    if done is not None:
+        query = query.filter(models.Note.done == done)
+    return query.order_by(models.Note.created_at.desc()).all()
+
 
 # Delete a note
 def delete_note(db: Session, note_id: int) -> bool:

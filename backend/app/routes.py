@@ -17,8 +17,8 @@ router = APIRouter(
     summary="Get all notes",
     description="Retrieve a list of all notes stored in the database. Each note includes its ID, title, content, done status, and creation timestamp."
 )
-def read_notes(db: Session = Depends(get_db)):
-    return services.get_notes(db)
+def read_notes(params: schemas.NoteQueryParams = Depends(), db: Session = Depends(get_db)):
+    return services.get_notes(db , q= params.q , done = params.done)
 
 
 # ---------- CREATE NOTE ----------
