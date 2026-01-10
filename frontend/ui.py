@@ -12,13 +12,13 @@ def add_note_dialog(backend_url):
 
         if st.button("Save Note", key="save_new_note"):
             if not title.strip():
-                st.error("❌ Title is required.")
+                st.error("Title is required.")
             elif not content.strip():
-                st.error("❌ Content is required.")
+                st.error("Content is required.")
             else:
                 try:
                     add_note(backend_url, title, content, done)
-                    st.session_state.show_toast = "✅ Note added successfully!"
+                    st.session_state.show_toast = "Note added successfully!"
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error adding note: {e}")
@@ -26,47 +26,69 @@ def add_note_dialog(backend_url):
 
 
 # ---- Edit Note Dialog ----
-def edit_note_dialog(backend_url, note):
+def edit_note_dialog(backend_url, note_id):
+    # Find the note in session_state
+    note = None
+    for n in st.session_state.notes:
+      if n["id"] == note_id:
+        note = n
+        break    
+    if not note:
+        st.error("Note not found")
+        return
+
     @st.dialog("Edit Note")
     def dialog():
-        title = st.text_input("Title", value=note["title"], key=f"edit_title_{note['id']}")
-        content = st.text_area("Content", value=note["content"], key=f"edit_content_{note['id']}")
-        done = st.checkbox("Done", value=note["done"], key=f"edit_done_{note['id']}")
-
-        if st.button("Save Changes", key=f"save_edit_{note['id']}"):
+        title = st.text_input("Title", value=note["title"])
+        content = st.text_area("Content", value=note["content"])
+        done = st.checkbox("Done", value=note["done"])
+        
+        if st.button("Save Changes", key=f"save_edit_{note_id}"):
             payload = {}
             if title: payload["title"] = title
             if content: payload["content"] = content
             if done is not None: payload["done"] = done
             try:
-                update_note(backend_url, note["id"], payload)
+                update_note(backend_url, note_id, payload)
                 st.session_state.edit_note_id = None
-                st.session_state.show_toast = "✅ Note updated successfully!"
+                st.session_state.show_toast = "Note updated successfully!"
                 st.rerun()
             except Exception as e:
                 st.error(f"Error updating note: {e}")
     dialog()
 
 
-def delete_note_dialog(backend_url, note):
+# ---- Delete Note Dialog ----
+def delete_note_dialog(backend_url, note_id):
+    # Find the note in session_state
+    note = None
+    for n in st.session_state.notes:
+      if n["id"] == note_id:
+        note = n
+        break
+    if not note:
+        st.error("Note not found")
+        return
+
     @st.dialog("Confirm Delete")
     def dialog():
-        st.warning(f"Note ID {note['id']}: Are you sure you want to delete note **{note['title']}**?")
+        st.warning(f"Note ID {note_id}: Are you sure you want to delete note **{note['title']}**?")
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("Yes, Delete", key=f"confirm_delete_{note['id']}", type="primary"):
+            if st.button("Yes, Delete", key=f"confirm_delete_{note_id}", type="primary"):
                 try:
-                    delete_note(backend_url, note["id"])
+                    delete_note(backend_url, note_id)
                     st.session_state.delete_note_id = None
                     st.session_state.show_toast = "✅ Note deleted successfully!"
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error deleting note: {e}")
         with c2:
-            if st.button("Cancel", key=f"cancel_delete_{note['id']}"):
+            if st.button("Cancel", key=f"cancel_delete_{note_id}"):
                 st.session_state.delete_note_id = None
                 st.rerun()
     dialog()
+
 
 
 # ---- Notes Table ----
@@ -124,6 +146,10 @@ def render_filters_and_notes(backend_url):
 
     # Fetch filtered notes from backend
     filtered_notes = get_notes(backend_url, q=search_text or None, done=done)
+    
+    #save notes into session state so can be used later to pass the id for note delete and update
+    if filtered_notes:
+        st.session_state.notes = filtered_notes
 
     # Render table
     render_notes_table(filtered_notes)

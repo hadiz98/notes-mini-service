@@ -1,6 +1,5 @@
 # app.py
 import streamlit as st
-from api import get_notes
 from ui import add_note_dialog, delete_note_dialog, edit_note_dialog, render_backend_config, render_filters_and_notes
 
 # ------------------ CONFIG ------------------
@@ -16,57 +15,39 @@ if "edit_note_id" not in st.session_state:
     st.session_state.edit_note_id = None
 if "delete_note_id" not in st.session_state:
     st.session_state.delete_note_id = None
+if "notes" not in st.session_state:
+    st.session_state.notes = []
+
 
 BACKEND_URL = st.session_state.backend_url
-
 
 # ------------------ SHOW TOAST ------------------
 if st.session_state.show_toast:
     st.toast(st.session_state.show_toast)
     st.session_state.show_toast = None
 
-# ------------------ FETCH NOTES ------------------
-notes = get_notes(BACKEND_URL)
-
-
-# ------------------ SEPERATOR FOR NOTES ------------------
-
+# ------------------ SEPARATOR ------------------
 st.markdown("---")
 st.subheader("All Notes")
-
-
 
 # ------------------ ADD NOTE ------------------
 if st.button("➕ Add Note"):
     add_note_dialog(BACKEND_URL)
 
-# ------------------ NOTES Table ------------------
+# fetch happens here with filters applied
 render_filters_and_notes(BACKEND_URL)
-
 
 # ------------------ EDIT NOTE DIALOG ------------------
 if st.session_state.edit_note_id is not None:
-    edit_note_id = None
-    for n in notes:
-       if n["id"] == st.session_state.edit_note_id:
-         edit_note_id = n
-         break
-    if edit_note_id:
-        edit_note_dialog(BACKEND_URL, edit_note_id)
+    edit_note_dialog(BACKEND_URL, st.session_state.edit_note_id)
+    st.session_state.edit_note_id = None
+
 
 # ------------------ DELETE NOTE DIALOG ------------------
 if st.session_state.delete_note_id is not None:
-    delete_note_id = None
-    for n in notes:
-       if n["id"] == st.session_state.delete_note_id:
-         delete_note_id = n
-         break
-    if delete_note_id:
-        delete_note_dialog(BACKEND_URL, delete_note_id)
+    delete_note_dialog(BACKEND_URL, st.session_state.delete_note_id)
+    st.session_state.delete_note_id = None
 
-# ------------------ NO NOTES MESSAGE ------------------
-if not notes:
-    st.info("No notes found. Add a new note above.")
 
 # ------------------ BACKEND CONFIG ------------------
 render_backend_config(BACKEND_URL)
