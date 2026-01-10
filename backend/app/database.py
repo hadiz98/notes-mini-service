@@ -1,8 +1,9 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.models import Base
 
-DATABASE_URL = "sqlite:///./notes.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./notes.db")
 
 # SQLite specification: check_same_thread=False
 engine = create_engine(
@@ -28,3 +29,4 @@ def get_db():
         yield db
     finally:
         db.close()
+
