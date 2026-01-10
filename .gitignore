@@ -15,4 +15,5 @@ env/
 *.db
 *.sqlite
 *.sqlite3
+backend/notes.db
 
