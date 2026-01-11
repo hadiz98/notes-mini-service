@@ -75,7 +75,7 @@ def delete_note_dialog(backend_url, note_id):
 
     @st.dialog("Confirm Delete")
     def dialog():
-        st.warning(f"Note ID {note_id}: Are you sure you want to delete note **{note['title']}**?")
+        st.warning(f"Are you sure you want to delete note **{note['title']}**?")
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Yes, Delete", key=f"confirm_delete_{note_id}", type="primary"):
@@ -83,7 +83,7 @@ def delete_note_dialog(backend_url, note_id):
                     try:
                         delete_note(backend_url, note_id)
                         st.session_state.delete_note_id = None
-                        st.session_state.show_toast = "✅ Note deleted successfully!"
+                        st.session_state.show_toast = "Note deleted successfully!"
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error deleting note: {e}")
@@ -107,7 +107,11 @@ def render_notes_table(notes):
         row_cols[0].write(note_id)
         row_cols[1].write(note["title"])
         row_cols[2].write(note["content"])
-        row_cols[3].write("✅" if note["done"] else "❌")
+        if note["done"]:
+          row_cols[3].badge("", icon=":material/check:", color="green")
+        else:
+          row_cols[3].badge("", icon=":material/close:", color="red")
+
         row_cols[4].write(format_date(note["created_at"]))
 
         with row_cols[5]:
@@ -124,11 +128,11 @@ def render_notes_table(notes):
 
 def render_backend_config(backend_url):
     st.markdown("---")
-    st.subheader("⚙️ Backend Configuration")
+    st.subheader("Backend Configuration")
     backend_url_input = st.text_input("Backend API URL", value=backend_url)
     if st.button("Save Backend URL"):
         st.session_state.backend_url = backend_url_input
-        st.toast(f"✅ Backend URL set to `{st.session_state.backend_url}`")
+        st.toast(f"Backend URL set to `{st.session_state.backend_url}`")
     st.write(f"Current Backend URL: `{st.session_state.backend_url}`")
 
 
